@@ -1,5 +1,5 @@
 # wgetg
-Open URL in graphical browser and return html source or save page as html file
+This is an alternative to `wget`, which opens an URL in a graphical browser and returns html source or saves the web page as html file. By that the html source code contains interactive changes made by javascript.
 
 **Demo:**
 
@@ -31,3 +31,17 @@ $ ./wgetg -t -b "google-chrome" -o "/home/foo" https://example.com
 /home/foo/2022-05-15T12-55-01 Example Domain.html
 ```
 
+**Options**
+
+Use `--help` (`-h`) to display all available options:
+
+```
+$ ./wgetg -h
+...
+  options:
+   -b, --browser       Executable browser name like "chromium", default is "firefox"
+   -o, --output        Destination file like /home/foo/bar.html or directory like /home/foo (filename becomes YYYY-MM-DDTHH-MM-SS.html)
+   -t, --title         Add web page title to filename
+   -w, --wait          Give the browser X seconds to load before saving the page, default is "4"
+   -v, --verbose       Explain what is being done
+```
