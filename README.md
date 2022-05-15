@@ -7,7 +7,7 @@ Open URL in graphical browser and return html source or save page as html file
 
 **Example: Open URL and return html source code**
 
-By default the script opens the URL with firefox or chromium and returns the html source code of the web page.
+By default wgetg opens the URL with firefox or chromium and returns the html source code of the web page.
 
 ```
 $ ./wgetg https://example.com
