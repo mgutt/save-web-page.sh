@@ -216,6 +216,7 @@ xdotool getactivewindow windowkill
 if [[ ! $output ]]; then
   cat "$file"
   rm "$file"
+# return filename
 else
   echo "$dirname/$filename"
 fi
