@@ -1,5 +1,5 @@
 # wgetg
-`wgetg` is an alternative to `wget` or `curl`, which opens an URL in a graphical browser and returns the html source or saves the web page as html file by using `xdotool`. By that the html source code contains interactive changes made by JavaScript.
+`wgetg` is an alternative to `wget` or `curl`, which opens an URL automatically in a graphical browser and returns the html source or saves the web page as file by using `xdotool`. By that the html source code contains interactive changes made by JavaScript.
 
 **Demo:**
 
