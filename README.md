@@ -1,16 +1,16 @@
-# save-web-page.sh
+# wgetg
 Open URL in graphical browser and return html source or save page as html file
 
 **Demo:**
 
-![Demo](save-web-page.sh.gif)
+![Demo](wgetg.gif)
 
 **Example: Open URL and return html source code**
 
 By default the script opens the URL with firefox or chromium and returns the html source code of the web page.
 
 ```
-$ ./save-web-page.sh https://example.com
+$ ./wgetg https://example.com
 <!doctype html>
 <html>
 <head>
@@ -27,7 +27,7 @@ $ ./save-web-page.sh https://example.com
 If a directory is set as `--outfile` ( `-o`), the filename will be "YYYY-MM-DDTHH-MM-SS.html" and the script returns this filename.
 
 ```
-$ ./save-web-page.sh -t -b "google-chrome" -o "/home/foo" https://example.com
+$ ./wgetg -t -b "google-chrome" -o "/home/foo" https://example.com
 /home/foo/2022-05-15T12-55-01 Example Domain.html
 ```
 
