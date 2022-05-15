@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # #####################################
-# Script:      wgetg - wget graphical v1.0
+# Script:      wgetg v1.0
 # Description: Open URL in a graphical browser and return html source code or save page in file.
 # Author:      Marc Gutt
 # 
