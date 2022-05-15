@@ -24,7 +24,7 @@ $ ./wgetg https://example.com
 
 **Example: Open URL with specific browser and save web page as HTML file with timestamp and page title in filename**
 
-If a directory is set as `--outfile` ( `-o`), the filename will be "YYYY-MM-DDTHH-MM-SS.html" and the script returns this filename.
+If a directory is set as `--outfile` ( `-o`), the filename will be "YYYY-MM-DDTHH-MM-SS.html" and the script returns this filename. If the `--title` (`-t`) option is set, it even adds the web page title to the filename.
 
 ```
 $ ./wgetg -t -b "google-chrome" -o "/home/foo" https://example.com
