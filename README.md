@@ -1,5 +1,5 @@
 # wgetg
-This is an alternative to `wget`, which opens an URL in a graphical browser and returns html source or saves the web page as html file. By that the html source code contains interactive changes made by javascript.
+This is an alternative to `wget`, which opens an URL in a graphical browser and returns it html source or saves the web page as html file. By that the html source code contains interactive changes made by javascript.
 
 **Demo:**
 
