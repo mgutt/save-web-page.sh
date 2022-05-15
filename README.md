@@ -7,7 +7,7 @@
 
 **Example: Open URL and return html source code**
 
-By default `wgetg` opens the URL with firefox or chromium and returns the html source code of the web page.
+By default `wgetg` opens the URL with Firefox or Chromium and returns the html source code of the web page.
 
 ```
 $ ./wgetg https://example.com
