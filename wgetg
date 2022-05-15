@@ -40,7 +40,7 @@ browser="$(getopt -q -u -l "browser:" "b:" "$@" | grep -oP "(?<= --browser | -b 
 output="$(getopt -q -u -l "output:" "o:" "$@" | grep -oP "(?<= --output | -o ).*(?= --.*)" || printf "")"
 wait="$(getopt -q -u -l "wait:" "w:" "$@" | grep -oP "(?<= --wait | -w ).*(?= --.*)" || printf "4")"
 title="$(getopt -q -u -l "title" "t" "$@" | grep -oP "(?<= --title | -t ).*(?=--.*)" && printf "1")"
-verbose="$(getopt -q -u -l "verbose" "V" "$@" | grep -oP "(?<= --verbose | -V ).*(?=--.*)" && printf "1")"
+verbose="$(getopt -q -u -l "verbose" "V" "$@" | grep -oP "(?<= --verbose | -v ).*(?=--.*)" && printf "1")"
 help="$(getopt -q -u -l "help" "h" "$@" | grep -oP "(?<= --help | -h ).*(?=--.*)" && printf "1")"
 url="${*: -1:1}"
 
@@ -60,7 +60,7 @@ if [[ $help ]]; then
    -o, --output        Destination file like /home/foo/bar.html or directory like /home/foo (filename becomes YYYY-MM-DDTHH-MM-SS.html)
    -t, --title         Add web page title to filename
    -w, --wait          Give the browser X seconds to load before saving the page, default is "4"
-   -V, --verbose       Explain what is being done
+   -v, --verbose       Explain what is being done
 EOF
   exit
 fi
