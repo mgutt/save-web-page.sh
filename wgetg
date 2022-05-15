@@ -61,6 +61,7 @@ if [[ $help ]]; then
    -t, --title         Add web page title to filename
    -w, --wait          Give the browser X seconds to load before saving the page, default is "4"
    -v, --verbose       Explain what is being done
+   -h, --help          This help text
 EOF
   exit
 fi
