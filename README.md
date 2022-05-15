@@ -45,3 +45,9 @@ $ ./wgetg -h
    -w, --wait          Give the browser X seconds to load before saving the page, default is "4"
    -v, --verbose       Explain what is being done
 ```
+
+**Requirements**
+ - Linux desktop environment
+ - A browser like Firefox
+ - xdotool
+ - xprop
