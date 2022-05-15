@@ -1,0 +1,221 @@
+#!/bin/bash
+
+# #####################################
+# Script:      wgetg - wget graphical v1.0
+# Description: Open URL in a graphical browser and return html source code or save page in a file.
+# Author:      Marc Gutt
+# 
+# Changelog:
+# 1.0
+# - initial release
+# #####################################
+
+# turn off history expansion (https://www.gnu.org/software/bash/manual/html_node/History-Interaction.html)
+set +H
+
+# obtain script name
+scriptname="$(basename "$0")"
+
+# make script race condition safe
+if [[ -d "/tmp/${0///}" ]] || ! mkdir "/tmp/${0///}"; then
+  echo "Error: $scriptname is already running!"
+  exit 1
+fi
+trap 'rmdir "/tmp/${0///}"' EXIT
+
+# check if xdotool is present
+if ! command -v xdotool >/dev/null; then
+  echo "Error: xdotool is not present!"
+  exit 1
+fi
+
+# check if xprop is present
+if ! command -v xprop >/dev/null; then
+  echo "Error: xprop is not present!"
+  exit 1
+fi
+
+# parse script arguments
+browser="$(getopt -q -u -l "browser:" "b:" "$@" | grep -oP "(?<= --browser | -b ).*(?= --.*)" || printf "")"
+output="$(getopt -q -u -l "output:" "o:" "$@" | grep -oP "(?<= --output | -o ).*(?= --.*)" || printf "")"
+wait="$(getopt -q -u -l "wait:" "w:" "$@" | grep -oP "(?<= --wait | -w ).*(?= --.*)" || printf "4")"
+title="$(getopt -q -u -l "title" "t" "$@" | grep -oP "(?<= --title | -t ).*(?=--.*)" && printf "1")"
+verbose="$(getopt -q -u -l "verbose" "V" "$@" | grep -oP "(?<= --verbose | -V ).*(?=--.*)" && printf "1")"
+help="$(getopt -q -u -l "help" "h" "$@" | grep -oP "(?<= --help | -h ).*(?=--.*)" && printf "1")"
+url="${*: -1:1}"
+
+# display help text
+if [[ $help ]]; then
+  cat << EOF
+  usage: $scriptname [options...] <url>
+
+  example: $scriptname "https://example.com"
+           uses "firefox" or "chromium" to open https://example.com and returns html source code
+
+  example: $scriptname -t -b "google-chrome" -o "/home/foo/" "https://example.com"
+           uses "google-chrome" to open https://example.com and saves it as /home/foo/YYYY-MM-DDTHH-MM-SS Page-Title.html
+
+  options:
+   -b, --browser       Executable browser name like "chromium", default is "firefox"
+   -o, --output        Destination file like /home/foo/bar.html or directory like /home/foo (filename becomes YYYY-MM-DDTHH-MM-SS.html)
+   -t, --title         Add web page title to filename
+   -w, --wait          Give the browser X seconds to load before saving the page, default is "4"
+   -V, --verbose       Explain what is being done
+EOF
+  exit
+fi
+
+# URL is required
+if [[ ! $url ]] || [[ ! "$url" =~ ^(https?|ftp|file)://.* ]]; then
+  echo "Error: URL is missing!"
+  exit 1
+fi
+
+# wait must be a number
+if ! [[ $wait =~ ^[0-9]+$ ]] ; then
+   echo "Error: Wait must be a number"
+   exit 1
+fi
+
+# create temporary file
+if [[ ! $output ]]; then
+  file="$(mktemp).html"
+  title="" # disable title in filename
+else
+  file="$output"
+fi
+
+# obtain absolute path
+file="$(readlink -f "$file")"
+
+# extract dirname and filename
+dirname="$file"
+if echo "$file" | grep -qoP "\.[a-zA-Z0-9]{1,4}$"; then
+  dirname="$(dirname "$file")"
+  filename="$(basename "$file")"
+fi
+
+# create timestamp based filename
+if [[ ! $filename ]]; then
+  filename="$(date +%Y%m%dT%H%M%S).html"
+fi
+
+# check if destination exists
+if [[ ! -d "$dirname" ]]; then
+  echo "Error: Directory $dirname not found!"
+  exit 1
+fi
+
+# set default browser
+if [[ ! $browser ]]; then
+  if command -v "firefox" >/dev/null; then
+    browser="firefox"
+  elif command -v "chromium-browser" >/dev/null; then
+    browser="chromium-browser"
+  else
+    echo "Error: No browser found!"
+    exit 1
+  fi
+fi
+
+# check if browser exists
+if ! command -v "$browser" >/dev/null; then
+  echo "Error: $browser is not present!"
+  exit 1
+fi
+
+# open URL through browser
+[[ $verbose ]] && echo "Info: Open $url through $browser"
+"$browser" "$url" &>/dev/null &
+
+# wait until the web page has been loaded
+sleep "$wait"
+
+# log active window
+wid="$(xdotool getactivewindow | head -n 1)"
+wtitle="$(xdotool getactivewindow getwindowname)"
+wclass=$(xprop -id "$wid" | grep WM_CLASS | grep -oP "(?<== ).*")
+[[ $verbose ]] && echo "Info: Active window is: $wtitle ($wid, $wclass)"
+
+# check if window is browser
+if [[ $wclass != *"$browser"* ]]; then
+  echo "Error: Unexpected active window!"
+  exit 1
+fi
+
+# create clean page title as filename CTRL-CHAR "   *   /   :   <   >   ?   \   |   DEL
+[[ $title ]] && title="$(echo "$wtitle" | tr -d '\000-\037\042\052\057\072\074\076\077\134\174\177' | cut -c1-80)"
+
+# press CTRL+s to open the save dialog
+xdotool windowactivate "$wid" key --delay 50 "ctrl+s"
+
+# wait until save dialog is open
+tries=0
+while [[ $(xdotool getactivewindow | head -n 1) == "$wid" ]]; do
+  tries=$((tries+1))
+  sleep 1
+  [[ $verbose ]] && echo "Info: Wait until save dialog is open..."
+  if [[ $tries -gt 10 ]]; then
+    echo "Error: Save dialog did not open!"
+    exit 1
+  fi
+done
+
+# log active window
+wid="$(xdotool getactivewindow | head -n 1)"
+wtitle="$(xdotool getactivewindow getwindowname)"
+wclass=$(xprop -id "$wid" | grep WM_CLASS | grep -oP "(?<== ).*")
+[[ $verbose ]] && echo "Info: Active window is: $wtitle ($wid, $wclass)"
+
+# add page title to filename
+[[ $title ]] && filename="${filename%.*} $title.${filename##*.}"
+
+[[ $verbose ]] && echo "Info: Save web page in $dirname/$filename"
+
+# select destination
+xdotool key --delay 50 "ctrl+a"
+
+# remove destination
+xdotool key --delay 50 "BackSpace"
+
+# enter destination
+xdotool type --delay 50 "$dirname/$filename"
+
+# save web page by pressing ENTER
+xdotool key --delay 50 "Return"
+
+# wait until save dialog is closed
+tries=0
+while [[ $(xdotool getactivewindow | head -n 1) == "$wid" ]]; do
+  tries=$((tries+1))
+  sleep 1
+  [[ $verbose ]] && echo "Info: Wait until save dialog is closed..."
+  if [[ $tries -gt 10 ]]; then
+    echo "Error: Save dialog did not close!"
+    exit 1
+  fi
+done
+
+# log active window
+wid="$(xdotool getactivewindow | head -n 1)"
+wtitle="$(xdotool getactivewindow getwindowname)"
+wclass=$(xprop -id "$wid" | grep WM_CLASS | grep -oP "(?<== ).*")
+[[ $verbose ]] && echo "Info: Active window is: $wtitle ($wid, $wclass)"
+
+# check if window is browser
+if [[ $wclass != *"$browser"* ]]; then
+  echo "Error: Unexpected active window!"
+  exit 1
+fi
+
+# close browser
+[[ $verbose ]] && echo "Info: Close $browser"
+xdotool getactivewindow windowkill
+
+# return html source
+if [[ ! $output ]]; then
+  cat "$file"
+  rm "$file"
+else
+  echo "$dirname/$filename"
+fi
