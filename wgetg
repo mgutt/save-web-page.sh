@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # #####################################
-# Script:      wgetg v1.0
+# Script:      wgetg v1.1
 # Description: Open URL in a graphical browser and return html source code or save page in file.
 # Author:      Marc Gutt
 # 
 # Changelog:
+# 1.1
+# - kill browser if save dialog did not open
 # 1.0
 # - initial release
 # #####################################
@@ -144,7 +146,7 @@ if [[ $wclass != *"$browser"* ]]; then
   exit 1
 fi
 
-# create clean page title as filename CTRL-CHAR "   *   /   :   <   >   ?   \   |   DEL
+# create clean page title as filename            CTRL-CHAR "   *   /   :   <   >   ?   \   |   DEL
 [[ $title ]] && title="$(echo "$wtitle" | tr -d '\000-\037\042\052\057\072\074\076\077\134\174\177' | cut -c1-80)"
 
 # press CTRL+s to open the save dialog
@@ -158,6 +160,14 @@ while [[ $(xdotool getactivewindow | head -n 1) == "$wid" ]]; do
   [[ $verbose ]] && echo "Info: Wait until save dialog is open..."
   if [[ $tries -gt 10 ]]; then
     echo "Error: Save dialog did not open!"
+    # check if window is browser
+    if [[ $wclass != *"$browser"* ]]; then
+      echo "Error: Unexpected active window!"
+      exit 1
+    fi
+    # close browser
+    [[ $verbose ]] && echo "Info: Close $browser"
+    xdotool getactivewindow windowkill
     exit 1
   fi
 done
